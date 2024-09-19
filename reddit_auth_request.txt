@@ -1,0 +1,1 @@
+https://www.reddit.com/api/v1/authorize?client_id=ZHmLbNUoaVSVdw&response_type=code&state=RANDOM_STRING&redirect_uri=https://www.eriknivala.com&duration=permanent&scope=identity,edit,flair,history,modconfig,modflair,modlog,modposts,modwiki,mysubreddits,privatemessages,read,report,save,submit,subscribe,vote,wikiedit,wikiread

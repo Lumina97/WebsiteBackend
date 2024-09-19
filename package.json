@@ -1,0 +1,38 @@
+{
+  "name": "erik-nivala-website",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@emailjs/browser": "^4.4.1",
+    "archiver": "^5.3.0",
+    "axios": "^0.21.1",
+    "compression": "^1.7.4",
+    "connect-mongo": "^5.0.0",
+    "dotenv": "^16.3.1",
+    "erik-nivala-website": "file:",
+    "express": "^4.18.2",
+    "express-session": "^1.17.2",
+    "express-sessions": "^1.0.6",
+    "mime": "^2.5.2",
+    "mime-types": "^2.1.29",
+    "mkdirp": "^0.5.5",
+    "nide": "^0.2.0",
+    "node": "^15.10.0",
+    "pino": "^8.15.0",
+    "pino-pretty": "^10.2.0",
+    "rewire": "^6.0.0",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "jest": "^29.6.2",
+    "nodemon": "^3.1.4"
+  }
+}
