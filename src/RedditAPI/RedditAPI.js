@@ -15,19 +15,14 @@ async function GetAccessToken() {
 }
 
 module.exports = {
-  GetAllImageLinks: async function (subreddit, session) {
+  GetAllImageLinks: async function (subreddit) {
     return new Promise(async function (resolve, reject) {
-      if (session === undefined) {
-        reject("Session was invalid");
-        return;
-      }
-      SubRedditToScan = subreddit;
-
       let access_token;
       try {
         const result = await GetAccessToken();
         access_token = result;
       } catch (error) {
+        console.log("RedditAPI - Error Getting access token!");
         reject("Error Getting access token!");
         return;
       }
@@ -40,10 +35,11 @@ module.exports = {
           resolve(result);
         })
         .catch((err) => {
-          log.warn("There was an error while gathering subreddit images!");
-          log.warn(err);
+          console.log(
+            "RedditAPI -  There was an error while gathering subreddit images!"
+          );
+          console.log(err);
           reject(err);
-          return;
         });
     });
   },
