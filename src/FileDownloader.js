@@ -4,6 +4,7 @@ const https = require("https");
 const http = require("http");
 const log = require("./Config").log;
 const FileZipper = require("./FileZipper");
+const { randomUUID } = require("crypto");
 
 const root = path.join(__dirname, "Images");
 path.normalize(root);
@@ -13,29 +14,28 @@ path.normalize(root);
 async function DownloadFilesFromLinks(links, ID) {
   return new Promise(async function (resolve, reject) {
     if (typeof links !== "undefined") {
-      log.info("have image links");
-      log.info("Starting download...");
+      console.log("have image links");
+      console.log("Starting download...");
 
       //======================DOWNLOAD FILES
       for (let i = 0; i < links.length; i++) {
         if (links[i].includes("https")) {
-          log.info("Starting HTTPS Download...");
+          console.log("Starting HTTPS Download...");
           await DownloadHTTPSFile(links[i], ID).catch((err) => {
-            log.warn();
-            "Error downloading file, \t" + err;
+            log.warn("Error downloading file, \t" + err);
             links[i] = null;
           });
         } else if (links[i].includes("http")) {
-          log.info("Starting HTTP Download...");
+          console.log("Starting HTTP Download...");
           await DownloadHTTPFile(links[i], ID).catch((err) => {
-            log.warn("Error downloading file, \t" + err);
+            console.log("Error downloading file, \t" + err);
             links[i] = null;
           });
         }
       }
       resolve(ID);
     } else {
-      log.error(
+      console.log(
         "Error With image links! - FileDownloader.js - DownloadFilesFromLinks()"
       );
       reject(false);
@@ -46,14 +46,14 @@ async function DownloadFilesFromLinks(links, ID) {
 
 async function CreateDirectory(Destination) {
   return new Promise(async function (resolve, reject) {
-    log.info("Checking file directory...");
+    console.log("Checking file directory...");
     if (fs.existsSync(Destination) == false) {
       await fs.mkdir(Destination, { recursive: true }, (error) => {
         if (error) {
-          log.error("error creating directory! : " + error);
+          console.log("error creating directory! : " + error);
           reject(error);
         } else resolve();
-        log.info("Created directory: " + Destination);
+        console.log("Created directory: " + Destination);
       });
     }
   });
@@ -61,13 +61,13 @@ async function CreateDirectory(Destination) {
 
 async function DownloadHTTPSFile(link, ID) {
   return new Promise(async function (resolve, reject) {
-    log.info("HTTPS DOWNLOAD: " + link);
+    console.log("HTTPS DOWNLOAD: " + link);
     const baseDest = path.join(root, ID);
     path.normalize(baseDest);
 
     const fileLocationArray = link.split("/");
     const fileLocation = fileLocationArray[fileLocationArray.length - 1];
-    log.info("file location: " + fileLocation);
+    console.log("file location: " + fileLocation);
     CreateDirectory(baseDest).catch((err) => {
       reject(err);
     });
@@ -81,8 +81,8 @@ async function DownloadHTTPSFile(link, ID) {
 
       //handle filestream write errors
       fileStream.on("error", function (error) {
-        log.error("Error downloading file: ");
-        log.error(error);
+        console.log("Error downloading file: ");
+        console.log(error);
         reject();
         return;
       });
@@ -90,15 +90,15 @@ async function DownloadHTTPSFile(link, ID) {
       // done downloading
       fileStream.on("finish", function () {
         fileStream.close();
-        log.info("Downloaded: " + fileLocation);
+        console.log("Downloaded: " + fileLocation);
         resolve();
         return;
       });
     });
     //handle https download errors
     req.on("error", function (error) {
-      log.error("Error downloading file");
-      log.error(error);
+      console.log("Error downloading file");
+      console.log(error);
       reject();
       return;
     });
@@ -125,22 +125,22 @@ async function DownloadHTTPFile(link, ID) {
 
       //handle fileStream write errors
       fileStream.on("error", function (error) {
-        log.error("Error downloading file: ");
-        log.error(error);
+        console.log("Error downloading file: ");
+        console.log(error);
         reject();
       });
 
       // done downloading
       fileStream.on("finish", function () {
         fileStream.close();
-        log.info("Downloaded: " + fileLocation);
+        console.log("Downloaded: " + fileLocation);
         resolve();
       });
     });
     //handle https download errors
     req.on("error", function (error) {
-      log.error("Error downloading file");
-      log.error(error);
+      console.log("Error downloading file");
+      console.log(error);
       reject();
     });
   });
@@ -149,26 +149,18 @@ async function DownloadHTTPFile(link, ID) {
 async function processFiles(fileLinks, ID) {
   try {
     const downloadedFiles = await DownloadFilesFromLinks(fileLinks, ID);
-    const zipResult = await FileZipper.CreateZipFromUserID(downloadedFiles);
-    return zipResult;
+    return FileZipper.CreateZipFromUserID(downloadedFiles);
   } catch (error) {
     throw error; // Or handle the error as needed
   }
 }
 
 module.exports = {
-  DownloadFilesFromLinksAndZip: async function (fileLinks, userID) {
+  DownloadFilesFromLinksAndZip: async function (fileLinks) {
     var today = new Date();
     var date =
       today.getHours() + "_" + today.getMinutes() + "_" + today.getSeconds();
-    const ID = path.join(String(userID), String(date));
-    return new Promise(async function (resolve, reject) {
-      await processFiles(fileLinks, ID)
-        .then((result) => resolve(result))
-        .catch((err) => {
-          if (err) log.error("Error downloading file! :" + err);
-          reject(false);
-        });
-    });
+    const ID = path.join(randomUUID(), String(date));
+    return processFiles(fileLinks, ID);
   },
 };

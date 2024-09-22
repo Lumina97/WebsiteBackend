@@ -4,20 +4,19 @@ import FileDownloader from "../FileDownloader";
 import RedditAPI from "../RedditAPI/RedditAPI";
 
 const ImageGathererRouter = Router();
-var downloadRequestDict: { [key: string]: string } = {};
 
 ImageGathererRouter.post(
   "/api/downloadFilesFromLinks",
   async (request, response) => {
     const links = request.body.links;
 
-    await FileDownloader.DownloadFilesFromLinksAndZip(links, request.session.id)
+    await FileDownloader.DownloadFilesFromLinksAndZip(links)
       .then((result) => {
-        // @ts-ignore
-        downloadRequestDict[request.session.id] = result;
+        if (result === false)
+          throw new Error("FileDownload returned with an error");
         try {
-          let data = JSON.stringify({ id: request.session.id });
-          log.info(`Returning data: ${request.session.id}`);
+          let data = JSON.stringify({ path: result });
+          log.info(`Returning data: ${data}`);
           response.json(data);
         } catch (error) {
           log.error("ERROR:\n" + error);
@@ -30,25 +29,17 @@ ImageGathererRouter.post(
   }
 );
 
-ImageGathererRouter.get("/api/download", async function (request, response) {
-  log.info("Download GET request");
-  for (const [key, value] of Object.entries(downloadRequestDict)) {
-    log.info(key, value);
-    if (key == request.session.id) {
-      log.info("Found request!");
-      const path = value;
-      log.info(path);
-      response.download(path, (err) => {
-        if (err) {
-          log.error("Error occurred while downloading the file:", err);
-          response
-            .status(500)
-            .send("Error occurred while downloading the file");
-        }
-      });
-      delete downloadRequestDict[key];
+ImageGathererRouter.post("/api/download", async function (request, response) {
+  const { path } = request.body;
+  log.info(path);
+  response.status(200).download(path, (err) => {
+    if (err) {
+      log.error("Error occurred while downloading the file:", err);
+      response.status(500).send("Error occurred while downloading the file");
+    } else {
+      log.info("download completed!");
     }
-  }
+  });
 });
 
 ImageGathererRouter.post(

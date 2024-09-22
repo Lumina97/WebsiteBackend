@@ -12,7 +12,7 @@ const app = express();
 const envPath = path.join(__dirname, "website.env");
 dotenv.config({ path: envPath });
 app.use(compression());
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json());
 
 const oneDay = 1000 * 60 * 60 * 24;
 const secretKey = process.env.SESSION_SECRET || "someRaNdOmSeCRet";

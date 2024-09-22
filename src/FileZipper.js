@@ -17,30 +17,32 @@ async function ZipFile(ID) {
     });
 
     output.on("close", function () {
-      log.info(archive.pointer() + " total bytes");
-      log.info("archiver has been finalized and the output file  has closed");
+      console.log(archive.pointer() + " total bytes");
+      console.log(
+        "archiver has been finalized and the output file  has closed"
+      );
       resolve(filepath);
     });
 
     output.on("end", function () {
-      log.info("data has been drained!");
+      console.log("data has been drained!");
     });
 
     archive.on("warning", function (err) {
       if (err.code === "ENOENT") {
-        log.warn("warning while creating archive!");
-        log.warn(err);
+        console.log("warning while creating archive!");
+        console.log(err);
       } else {
-        log.info("Error while creating archive!");
-        log.error(err);
+        console.log("Error while creating archive!");
+        console.log(err);
         reject(false);
         return;
       }
     });
 
     archive.on("error", function (err) {
-      log.info("Error while creating archive!");
-      log.info(err);
+      console.log("Error while creating archive!");
+      console.log(err);
       reject(false);
       return;
     });
@@ -60,11 +62,11 @@ module.exports = {
     return new Promise(async function (resolve, reject) {
       await ZipFile(ID)
         .then((result) => {
-          log.info("Created archive! Returning path: " + result);
+          console.log("Created archive! Returning path: " + result);
           resolve(result);
         })
         .catch((err) => {
-          log.error("Error creating archive! \n " + err + "\n");
+          console.log("Error creating archive! \n " + err + "\n");
           reject(false);
           return;
         });
