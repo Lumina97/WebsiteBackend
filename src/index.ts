@@ -1,4 +1,5 @@
 import { ImageGathererRouter } from "./Routers/ImageGatherer";
+import { AdminRoute } from "./Routers/Admin";
 import path from "path";
 import dotenv from "dotenv";
 import express from "express";
@@ -17,17 +18,18 @@ app.use(express.json());
 const oneDay = 1000 * 60 * 60 * 24;
 const secretKey = process.env.SESSION_SECRET || "someRaNdOmSeCRet";
 
+app.use(cors());
+app.options("*", cors()); // Handle preflight requests
+// Add this before your route definitions
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: "http://localhost:5173", // Your frontend URL
+    methods: ["GET"],
   })
 );
 
-app.options("*", cors()); // Handle preflight requests
-
 app.use(ImageGathererRouter);
+app.use(AdminRoute);
 app.use(
   session({
     name: "SessionCookie",

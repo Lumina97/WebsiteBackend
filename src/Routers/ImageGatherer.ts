@@ -1,7 +1,7 @@
 import { Router } from "express";
 import log from "../Config";
-import FileDownloader from "../FileDownloader";
-import RedditAPI from "../RedditAPI/RedditAPI";
+import { DownloadFilesFromLinksAndZip } from "../FileDownloader";
+import { GetAllImageLinks } from "../RedditAPI/RedditAPI";
 
 const ImageGathererRouter = Router();
 
@@ -10,9 +10,9 @@ ImageGathererRouter.post(
   async (request, response) => {
     const links = request.body.links;
 
-    await FileDownloader.DownloadFilesFromLinksAndZip(links)
+    await DownloadFilesFromLinksAndZip(links)
       .then((result) => {
-        if (result === false)
+        if (result === undefined)
           throw new Error("FileDownload returned with an error");
         try {
           let data = JSON.stringify({ path: result });
@@ -52,7 +52,7 @@ ImageGathererRouter.post(
       return;
     }
 
-    await RedditAPI.GetAllImageLinks(data.subreddit)
+    await GetAllImageLinks(data.subreddit)
       .then((result) => {
         let returnData;
         try {
@@ -64,7 +64,7 @@ ImageGathererRouter.post(
         }
       })
       .catch((error) => {
-        log.error(`${error} | imageGatherer.js`);
+        log.error(`${error} | imageGatherer.ts`);
         response.status(400).send();
       });
   }

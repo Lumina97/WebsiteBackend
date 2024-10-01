@@ -2,12 +2,28 @@ import pino from "pino";
 import path from "path";
 import fs from "fs";
 
-const logDirectory = path.join(__dirname, "Log");
-const logFilePath = path.join(logDirectory, "app.log");
+function getFormattedDate(): string {
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+  const day = String(currentDate.getDate()).padStart(2, "0");
 
-// Create the log directory if it does not exist
-if (!fs.existsSync(logDirectory)) {
-  fs.mkdirSync(logDirectory);
+  return `${year}-${month}-${day}`;
+}
+
+function getFormattedHour(): string {
+  const currentHour = new Date().getHours();
+  return String(currentHour).padStart(2, "0");
+}
+
+const rootDirectory = path.resolve(__dirname, "..");
+const baseDirectory = path.join(rootDirectory, "Log");
+const todayDirectory = path.join(baseDirectory, getFormattedDate());
+const hourDirectory = path.join(todayDirectory, getFormattedHour());
+export let currentLogFile = hourDirectory + ".log";
+
+if (!fs.existsSync(todayDirectory)) {
+  fs.mkdirSync(todayDirectory, { recursive: true });
 }
 
 const transport = pino.transport({
@@ -16,7 +32,7 @@ const transport = pino.transport({
       level: "trace",
       target: "pino/file",
       options: {
-        destination: logFilePath,
+        destination: currentLogFile,
       },
     },
     {
