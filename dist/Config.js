@@ -3,14 +3,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.currentLogFile = void 0;
 const pino_1 = __importDefault(require("pino"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
-const logDirectory = path_1.default.join(__dirname, "Log");
-const logFilePath = path_1.default.join(logDirectory, "app.log");
-// Create the log directory if it does not exist
-if (!fs_1.default.existsSync(logDirectory)) {
-    fs_1.default.mkdirSync(logDirectory);
+function getFormattedDate() {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+    const day = String(currentDate.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+function getFormattedHour() {
+    const currentHour = new Date().getHours();
+    return String(currentHour).padStart(2, "0");
+}
+const rootDirectory = path_1.default.resolve(__dirname, "..");
+const baseDirectory = path_1.default.join(rootDirectory, "Log");
+const todayDirectory = path_1.default.join(baseDirectory, getFormattedDate());
+const hourDirectory = path_1.default.join(todayDirectory, getFormattedHour());
+exports.currentLogFile = hourDirectory + ".log";
+if (!fs_1.default.existsSync(todayDirectory)) {
+    fs_1.default.mkdirSync(todayDirectory, { recursive: true });
 }
 const transport = pino_1.default.transport({
     targets: [
@@ -18,7 +32,7 @@ const transport = pino_1.default.transport({
             level: "trace",
             target: "pino/file",
             options: {
-                destination: logFilePath,
+                destination: exports.currentLogFile,
             },
         },
         {

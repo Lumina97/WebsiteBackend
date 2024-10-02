@@ -8,41 +8,44 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const axios = require("axios");
-const { url } = require("inspector");
-const querystring = require("querystring");
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GetImageLinksFromSubreddit = void 0;
+const axios_1 = __importDefault(require("axios"));
+const querystring_1 = __importDefault(require("querystring"));
+const Config_1 = __importDefault(require("../Config"));
 const oAuthURL = "https://oauth.reddit.com";
 const imagePostAmount = 100;
 let Access_Token;
 function GetRedditPosts(subreddit) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log(`Getting posts from ${subreddit} - LinksGatherer.js - GetRedditPosts()`);
-        const params = querystring.stringify({
+        Config_1.default.info(`Getting posts from ${subreddit} - LinksGatherer.ts - GetRedditPosts()`);
+        const params = querystring_1.default.stringify({
             limit: imagePostAmount,
         });
-        let urlink = oAuthURL + "/r/" + subreddit + "/new" + "?" + params;
-        urlink = urlink.replace(/\s+/g, "");
+        const urlink = `${oAuthURL}/r/${subreddit}/new?${params}`.replace(/\s+/g, "");
         const config = {
             method: "get",
             url: urlink,
             headers: {
-                Authorization: "BEARER " + Access_Token,
+                Authorization: "Bearer " + Access_Token,
                 "User-Agent": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1 Mobile/15E148 Safari/604.1",
             },
         };
-        return axios(config).then((result) => {
+        try {
+            const result = yield (0, axios_1.default)(config);
             const postArray = result.data.data.children;
-            if (typeof postArray === undefined || postArray.length === 0) {
-                console.log("Subreddit does not exist! - LinksGatherer.js");
-                reject("Error: Subreddit does not exist!");
-                return;
+            if (!postArray || postArray.length === 0) {
+                Config_1.default.error("Subreddit does not exist! - LinksGatherer.ts");
+                throw new Error("Subreddit does not exist!");
             }
             const image_links = [];
             let amountOfImages = 0;
             let bHasAnyImageLinks = false;
-            console.log(Array.isArray(postArray));
             for (let post of postArray) {
-                if (post.kind == "t3" &&
+                if (post.kind === "t3" &&
                     (post.data.url.includes(".jpg") ||
                         post.data.url.includes(".png") ||
                         post.data.url.includes(".jpeg"))) {
@@ -54,51 +57,47 @@ function GetRedditPosts(subreddit) {
                         }
                     }
                     image_links.push([thumbnail, post.data.url]);
-                    console.log("URL: " + post.data.url);
+                    Config_1.default.info("URL: " + post.data.url);
                     bHasAnyImageLinks = true;
                     amountOfImages++;
                 }
                 else {
-                    console.log("Not an image post");
+                    Config_1.default.info("Not an image post");
                 }
             }
-            if (bHasAnyImageLinks === false) {
-                console.log("No image links found! - LinksGatherer.js - GetRedditPosts()");
+            if (!bHasAnyImageLinks) {
+                Config_1.default.error("No image links found! - LinksGatherer.ts - GetRedditPosts()");
                 throw new Error("No images in specified search!");
             }
             else {
-                console.log("Found " +
+                Config_1.default.info("Found " +
                     amountOfImages +
-                    " links! - LinksGatherer.js - GetRedditPosts()");
+                    " links! - LinksGatherer.ts - GetRedditPosts()");
                 return image_links;
             }
-        });
+        }
+        catch (err) {
+            Config_1.default.error(`RedditLinksGatherer - Error - ${err}`);
+            throw new Error(String(err));
+        }
     });
 }
-module.exports = {
-    GetImageLinksFromSubreddit: function (subreddit, access_token) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise(function (resolve, reject) {
-                return __awaiter(this, void 0, void 0, function* () {
-                    Access_Token = access_token;
-                    // validate input
-                    if (typeof subreddit === "undefined") {
-                        console.log("Passed in subreddit was undefined! - DownloadImagesFromSubreddit() ");
-                        return reject("Unable to find subreddit");
-                    }
-                    //wait to get links
-                    return GetRedditPosts(subreddit)
-                        .then((result) => {
-                        return resolve(result);
-                    })
-                        .catch((err) => {
-                        if (err)
-                            console.log("Error Getting image links: " + err);
-                        throw new Error("There's been an issue getting images.");
-                    });
-                });
-            });
-        });
-    },
+const GetImageLinksFromSubreddit = function (subreddit, access_token) {
+    return __awaiter(this, void 0, void 0, function* () {
+        Access_Token = access_token;
+        // validate input
+        if (typeof subreddit === "undefined") {
+            Config_1.default.error("Passed in subreddit was undefined! - DownloadImagesFromSubreddit() ");
+            throw new Error("There's been an issue getting images.");
+        }
+        //wait to get links
+        try {
+            return GetRedditPosts(subreddit);
+        }
+        catch (_a) {
+            throw new Error("There's been an issue getting images.");
+        }
+    });
 };
+exports.GetImageLinksFromSubreddit = GetImageLinksFromSubreddit;
 //# sourceMappingURL=RedditLinksGatherer.js.map

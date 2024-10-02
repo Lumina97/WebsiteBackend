@@ -8,184 +8,165 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const path = require("path");
-const fs = require("fs");
-const https = require("https");
-const http = require("http");
-const log = require("./Config").log;
-const FileZipper = require("./FileZipper");
-const root = path.join(__dirname, "Images");
-path.normalize(root);
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DownloadFilesFromLinksAndZip = void 0;
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
+const https_1 = __importDefault(require("https"));
+const http_1 = __importDefault(require("http"));
+const Config_1 = __importDefault(require("./Config"));
+const FileZipper_1 = require("./FileZipper");
+const uuid_1 = require("uuid");
+const root = path_1.default.join(__dirname, "Images");
+path_1.default.normalize(root);
 //=====================FILE DOWNLOAD======================
 function DownloadFilesFromLinks(links, ID) {
     return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(function (resolve, reject) {
-            return __awaiter(this, void 0, void 0, function* () {
-                if (typeof links !== "undefined") {
-                    log.info("have image links");
-                    log.info("Starting download...");
-                    //======================DOWNLOAD FILES
-                    for (let i = 0; i < links.length; i++) {
-                        if (links[i].includes("https")) {
-                            log.info("Starting HTTPS Download...");
-                            yield DownloadHTTPSFile(links[i], ID).catch((err) => {
-                                log.warn();
-                                "Error downloading file, \t" + err;
-                                links[i] = null;
-                            });
-                        }
-                        else if (links[i].includes("http")) {
-                            log.info("Starting HTTP Download...");
-                            yield DownloadHTTPFile(links[i], ID).catch((err) => {
-                                log.warn("Error downloading file, \t" + err);
-                                links[i] = null;
-                            });
-                        }
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            if (links) {
+                Config_1.default.info("Have image links");
+                Config_1.default.info("Starting download...");
+                //======================DOWNLOAD FILES
+                for (const link of links) {
+                    if (link.includes("https")) {
+                        Config_1.default.info("Starting HTTPS Download...");
+                        yield DownloadHTTPSFile(link, ID).catch((err) => {
+                            Config_1.default.warn("Error downloading file, \t" + err);
+                        });
                     }
-                    resolve(ID);
+                    else if (link.includes("http")) {
+                        Config_1.default.info("Starting HTTP Download...");
+                        yield DownloadHTTPFile(link, ID).catch((err) => {
+                            Config_1.default.warn("Error downloading file, \t" + err);
+                        });
+                    }
                 }
-                else {
-                    log.error("Error With image links! - FileDownloader.js - DownloadFilesFromLinks()");
-                    reject(false);
-                    return;
-                }
-            });
-        });
+                resolve(ID);
+            }
+            else {
+                Config_1.default.error("Error with image links! - FileDownloader.ts - DownloadFilesFromLinks()");
+                reject(false);
+            }
+        }));
     });
 }
-function CreateDirectory(Destination) {
+function CreateDirectory(destination) {
     return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(function (resolve, reject) {
-            return __awaiter(this, void 0, void 0, function* () {
-                log.info("Checking file directory...");
-                if (fs.existsSync(Destination) == false) {
-                    yield fs.mkdir(Destination, { recursive: true }, (error) => {
-                        if (error) {
-                            log.error("error creating directory! : " + error);
-                            reject(error);
-                        }
-                        else
-                            resolve();
-                        log.info("Created directory: " + Destination);
-                    });
-                }
-            });
+        return new Promise((resolve, reject) => {
+            Config_1.default.info("Checking file directory...");
+            if (!fs_1.default.existsSync(destination)) {
+                fs_1.default.mkdir(destination, { recursive: true }, (error) => {
+                    if (error) {
+                        Config_1.default.error("Error creating directory! : " + error);
+                        reject(error);
+                    }
+                    else {
+                        Config_1.default.info("Created directory: " + destination);
+                        resolve();
+                    }
+                });
+            }
+            else {
+                resolve(); // Resolve if the directory already exists
+            }
         });
     });
 }
 function DownloadHTTPSFile(link, ID) {
     return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(function (resolve, reject) {
-            return __awaiter(this, void 0, void 0, function* () {
-                log.info("HTTPS DOWNLOAD: " + link);
-                const baseDest = path.join(root, ID);
-                path.normalize(baseDest);
-                const fileLocationArray = link.split("/");
-                const fileLocation = fileLocationArray[fileLocationArray.length - 1];
-                log.info("file location: " + fileLocation);
-                CreateDirectory(baseDest).catch((err) => {
-                    reject(err);
-                });
-                let dest = path.join(baseDest, fileLocation);
-                path.normalize(dest);
-                const req = https.get(link, function (res) {
-                    const fileStream = fs.createWriteStream(dest);
-                    res.pipe(fileStream);
-                    //handle filestream write errors
-                    fileStream.on("error", function (error) {
-                        log.error("Error downloading file: ");
-                        log.error(error);
-                        reject();
-                        return;
-                    });
-                    // done downloading
-                    fileStream.on("finish", function () {
-                        fileStream.close();
-                        log.info("Downloaded: " + fileLocation);
-                        resolve();
-                        return;
-                    });
-                });
-                //handle https download errors
-                req.on("error", function (error) {
-                    log.error("Error downloading file");
-                    log.error(error);
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            Config_1.default.info("HTTPS DOWNLOAD: " + link);
+            const baseDest = path_1.default.join(root, ID);
+            path_1.default.normalize(baseDest);
+            const fileLocationArray = link.split("/");
+            const fileLocation = fileLocationArray[fileLocationArray.length - 1];
+            Config_1.default.info("File location: " + fileLocation);
+            yield CreateDirectory(baseDest).catch((err) => {
+                reject(err);
+            });
+            const dest = path_1.default.join(baseDest, fileLocation);
+            path_1.default.normalize(dest);
+            const req = https_1.default.get(link, (res) => {
+                const fileStream = fs_1.default.createWriteStream(dest);
+                res.pipe(fileStream);
+                // Handle fileStream write errors
+                fileStream.on("error", (error) => {
+                    Config_1.default.error("Error downloading file: ");
+                    Config_1.default.error(error);
                     reject();
-                    return;
+                });
+                // Done downloading
+                fileStream.on("finish", () => {
+                    fileStream.close();
+                    Config_1.default.info("Downloaded: " + fileLocation);
+                    resolve();
                 });
             });
-        });
+            // Handle HTTPS download errors
+            req.on("error", (error) => {
+                Config_1.default.error("Error downloading file");
+                Config_1.default.error(error);
+                reject();
+            });
+        }));
     });
 }
 function DownloadHTTPFile(link, ID) {
     return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(function (resolve, reject) {
-            return __awaiter(this, void 0, void 0, function* () {
-                const baseDest = path.join(root, ID, SubRedditToScan);
-                path.normalize(baseDest);
-                const fileLocationArray = link.split("/");
-                const fileLocation = fileLocationArray[fileLocationArray.length - 1];
-                let dest = path.join(baseDest, fileLocation);
-                path.normalize(dest);
-                CreateDirectory(baseDest).catch((err) => {
-                    reject(err);
-                });
-                const req = http.get(link, function (res) {
-                    const fileStream = fs.createWriteStream(dest);
-                    res.pipe(fileStream);
-                    //handle fileStream write errors
-                    fileStream.on("error", function (error) {
-                        log.error("Error downloading file: ");
-                        log.error(error);
-                        reject();
-                    });
-                    // done downloading
-                    fileStream.on("finish", function () {
-                        fileStream.close();
-                        log.info("Downloaded: " + fileLocation);
-                        resolve();
-                    });
-                });
-                //handle https download errors
-                req.on("error", function (error) {
-                    log.error("Error downloading file");
-                    log.error(error);
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            const baseDest = path_1.default.join(root, ID);
+            path_1.default.normalize(baseDest);
+            const fileLocationArray = link.split("/");
+            const fileLocation = fileLocationArray[fileLocationArray.length - 1];
+            const dest = path_1.default.join(baseDest, fileLocation);
+            path_1.default.normalize(dest);
+            yield CreateDirectory(baseDest).catch((err) => {
+                reject(err);
+            });
+            const req = http_1.default.get(link, (res) => {
+                const fileStream = fs_1.default.createWriteStream(dest);
+                res.pipe(fileStream);
+                // Handle fileStream write errors
+                fileStream.on("error", (error) => {
+                    Config_1.default.error("Error downloading file: ");
+                    Config_1.default.error(error);
                     reject();
                 });
+                // Done downloading
+                fileStream.on("finish", () => {
+                    fileStream.close();
+                    Config_1.default.info("Downloaded: " + fileLocation);
+                    resolve();
+                });
             });
-        });
+            // Handle HTTP download errors
+            req.on("error", (error) => {
+                Config_1.default.error("Error downloading file");
+                Config_1.default.error(error);
+                reject();
+            });
+        }));
     });
 }
 function processFiles(fileLinks, ID) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const downloadedFiles = yield DownloadFilesFromLinks(fileLinks, ID);
-            const zipResult = yield FileZipper.CreateZipFromUserID(downloadedFiles);
-            return zipResult;
+            return (0, FileZipper_1.CreateZipFromUserID)(downloadedFiles);
         }
         catch (error) {
             throw error; // Or handle the error as needed
         }
     });
 }
-module.exports = {
-    DownloadFilesFromLinksAndZip: function (fileLinks, userID) {
-        return __awaiter(this, void 0, void 0, function* () {
-            var today = new Date();
-            var date = today.getHours() + "_" + today.getMinutes() + "_" + today.getSeconds();
-            const ID = path.join(String(userID), String(date));
-            return new Promise(function (resolve, reject) {
-                return __awaiter(this, void 0, void 0, function* () {
-                    yield processFiles(fileLinks, ID)
-                        .then((result) => resolve(result))
-                        .catch((err) => {
-                        if (err)
-                            log.error("Error downloading file! :" + err);
-                        reject(false);
-                    });
-                });
-            });
-        });
-    },
-};
+const DownloadFilesFromLinksAndZip = (fileLinks) => __awaiter(void 0, void 0, void 0, function* () {
+    const today = new Date();
+    const date = `${today.getHours()}_${today.getMinutes()}_${today.getSeconds()}`;
+    const ID = path_1.default.join((0, uuid_1.v4)(), String(date));
+    return processFiles(fileLinks, ID);
+});
+exports.DownloadFilesFromLinksAndZip = DownloadFilesFromLinksAndZip;
 //# sourceMappingURL=FileDownloader.js.map

@@ -1,0 +1,37 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug TypeScript",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register",
+        "-r",
+        "source-map-support/register"
+      ],
+      "args": ["${workspaceFolder}/src/index.ts"],
+      "sourceMaps": true,
+      // "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "preLaunchTask": "tsc: build - tsconfig.json"
+    }
+  ]
+}
+// {
+//   // Use IntelliSense to learn about possible attributes.
+//   // Hover to view descriptions of existing attributes.
+//   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+//   "version": "0.2.0",
+//   "configurations": [
+//     {
+//       "type": "node",
+//       "request": "launch",
+//       "name": "Launch Program",
+//       "program": "${workspaceFolder}/*.ts",
+//       "preLaunchTask": "tsc: build - tsconfig.json",
+//       "outFiles": ["${workspaceFolder}/out/**/*.js"]
+//     }
+//   ]
+// }

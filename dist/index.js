@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ImageGatherer_1 = require("./Routers/ImageGatherer");
+const Admin_1 = require("./Routers/Admin");
 const path_1 = __importDefault(require("path"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
@@ -16,16 +17,18 @@ const app = (0, express_1.default)();
 const envPath = path_1.default.join(__dirname, "website.env");
 dotenv_1.default.config({ path: envPath });
 app.use((0, compression_1.default)());
-app.use(express_1.default.json({ limit: "1mb" }));
+app.use(express_1.default.json());
 const oneDay = 1000 * 60 * 60 * 24;
 const secretKey = process.env.SESSION_SECRET || "someRaNdOmSeCRet";
-app.use((0, cors_1.default)({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-}));
+app.use((0, cors_1.default)());
 app.options("*", (0, cors_1.default)()); // Handle preflight requests
+// Add this before your route definitions
+app.use((0, cors_1.default)({
+    origin: "http://localhost:5173", // Your frontend URL
+    methods: ["GET"],
+}));
 app.use(ImageGatherer_1.ImageGathererRouter);
+app.use(Admin_1.AdminRoute);
 app.use((0, express_session_1.default)({
     name: "SessionCookie",
     genid: () => {

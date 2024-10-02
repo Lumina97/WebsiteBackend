@@ -8,76 +8,68 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const fs = require("fs");
-const path = require("path");
-const archiver = require("archiver");
-const log = require("./Config").log;
-const root = path.join(__dirname, "Images");
-path.normalize(root);
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CreateZipFromUserID = void 0;
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
+const archiver_1 = __importDefault(require("archiver"));
+const Config_1 = __importDefault(require("./Config")); // Ensure `log` is properly typed in Config
+const root = path_1.default.join(__dirname, "Images");
+path_1.default.normalize(root);
 function ZipFile(ID) {
     return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(function (resolve, reject) {
-            return __awaiter(this, void 0, void 0, function* () {
-                var filepath = path.join(root, ID);
-                path.normalize(filepath);
-                filepath += ".zip";
-                const output = fs.createWriteStream(filepath);
-                const archive = archiver("zip", {
-                    zlib: { level: 9 },
-                });
-                output.on("close", function () {
-                    log.info(archive.pointer() + " total bytes");
-                    log.info("archiver has been finalized and the output file  has closed");
-                    resolve(filepath);
-                });
-                output.on("end", function () {
-                    log.info("data has been drained!");
-                });
-                archive.on("warning", function (err) {
-                    if (err.code === "ENOENT") {
-                        log.warn("warning while creating archive!");
-                        log.warn(err);
-                    }
-                    else {
-                        log.info("Error while creating archive!");
-                        log.error(err);
-                        reject(false);
-                        return;
-                    }
-                });
-                archive.on("error", function (err) {
-                    log.info("Error while creating archive!");
-                    log.info(err);
-                    reject(false);
-                    return;
-                });
-                archive.pipe(output);
-                const file = path.join(root, ID);
-                path.normalize(file);
-                archive.directory(file, "images");
-                archive.finalize();
+        return new Promise((resolve, reject) => {
+            const filepath = path_1.default.join(root, ID) + ".zip";
+            const output = fs_1.default.createWriteStream(filepath);
+            const archive = archiver_1.default.create("zip", {
+                zlib: { level: 9 },
             });
+            output.on("close", () => {
+                Config_1.default.info(archive.pointer() + " total bytes");
+                Config_1.default.info("Archiver has been finalized and the output file has closed");
+                resolve(filepath);
+            });
+            output.on("end", () => {
+                Config_1.default.info("Data has been drained!");
+            });
+            archive.on("warning", (err) => {
+                if (err.code === "ENOENT") {
+                    Config_1.default.warn("Warning while creating archive!");
+                    Config_1.default.warn(err);
+                }
+                else {
+                    Config_1.default.error("Error while creating archive!");
+                    Config_1.default.error(err);
+                    reject(err);
+                }
+            });
+            archive.on("error", (err) => {
+                Config_1.default.error("Error while creating archive!");
+                Config_1.default.error(err);
+                reject(err);
+            });
+            archive.pipe(output);
+            const file = path_1.default.join(root, ID);
+            archive.directory(file, "images");
+            archive.finalize();
         });
     });
 }
-module.exports = {
-    CreateZipFromUserID: function (ID) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise(function (resolve, reject) {
-                return __awaiter(this, void 0, void 0, function* () {
-                    yield ZipFile(ID)
-                        .then((result) => {
-                        log.info("Created archive! Returning path: " + result);
-                        resolve(result);
-                    })
-                        .catch((err) => {
-                        log.error("Error creating archive! \n " + err + "\n");
-                        reject(false);
-                        return;
-                    });
-                });
-            });
-        });
-    },
-};
+const CreateZipFromUserID = (ID) => __awaiter(void 0, void 0, void 0, function* () {
+    return new Promise((resolve, reject) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const result = yield ZipFile(ID);
+            Config_1.default.info("Created archive! Returning path: " + result);
+            resolve(result);
+        }
+        catch (err) {
+            Config_1.default.error("Error creating archive! \n " + err + "\n");
+            reject(err);
+        }
+    }));
+});
+exports.CreateZipFromUserID = CreateZipFromUserID;
 //# sourceMappingURL=FileZipper.js.map
