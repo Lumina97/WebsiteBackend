@@ -1,6 +1,6 @@
 import pino from "pino";
 import path from "path";
-import fs from "fs";
+import { mkdirSync, existsSync } from "fs";
 
 function getFormattedDate(): string {
   const currentDate = new Date();
@@ -16,16 +16,14 @@ function getFormattedHour(): string {
   return String(currentHour).padStart(2, "0");
 }
 
-const rootDirectory = path.resolve(__dirname, "..");
-const baseDirectory = path.join(rootDirectory, "Log");
+const baseDirectory = path.join("/tmp", "Log");
 const todayDirectory = path.join(baseDirectory, getFormattedDate());
 const hourDirectory = path.join(todayDirectory, getFormattedHour());
 export let currentLogFile = hourDirectory + ".log";
 
-if (!fs.existsSync(todayDirectory)) {
-  fs.mkdirSync(todayDirectory, { recursive: true });
+if (!existsSync(hourDirectory)) {
+  mkdirSync(hourDirectory, { recursive: true });
 }
-
 const transport = pino.transport({
   targets: [
     {
