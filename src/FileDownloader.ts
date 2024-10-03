@@ -2,11 +2,12 @@ import fs from "fs";
 import path from "path";
 import https from "https";
 import http from "http";
-import log from "./Config";
+import log from "./Logging";
 import { CreateZipFromUserID } from "./FileZipper";
 import { v4 as uuidv4 } from "uuid";
+import { imageFilePath } from "./globals";
 
-const root = path.join(__dirname, "Images");
+const root = imageFilePath;
 path.normalize(root);
 
 //=====================FILE DOWNLOAD======================

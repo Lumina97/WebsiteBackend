@@ -2,7 +2,7 @@ import path from "path";
 import dotenv from "dotenv";
 import axios, { AxiosResponse } from "axios";
 import querystring from "querystring";
-import log from "../Config";
+import log from "../Logging";
 
 const basePath = path.resolve(__dirname, "../../");
 const envPath = path.join(basePath, "website.env");

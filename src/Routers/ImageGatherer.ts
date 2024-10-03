@@ -1,5 +1,5 @@
 import { Router } from "express";
-import log from "../Config";
+import log from "../Logging";
 import { DownloadFilesFromLinksAndZip } from "../FileDownloader";
 import { GetAllImageLinks } from "../RedditAPI/RedditAPI";
 

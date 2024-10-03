@@ -1,9 +1,10 @@
 import fs from "fs";
 import path from "path";
 import archiver from "archiver";
-import log from "./Config"; // Ensure `log` is properly typed in Config
+import log from "./Logging"; // Ensure `log` is properly typed in Config
+import { imageFilePath } from "./globals";
 
-const root = path.join(__dirname, "Images");
+const root = imageFilePath;
 path.normalize(root);
 
 async function ZipFile(ID: string): Promise<string> {

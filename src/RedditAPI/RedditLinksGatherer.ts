@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import querystring from "querystring";
-import log from "../Config";
+import log from "../Logging";
 
 const oAuthURL = "https://oauth.reddit.com";
 const imagePostAmount = 100;

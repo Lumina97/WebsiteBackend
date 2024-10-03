@@ -1,14 +1,39 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, response } from "express";
 import fs from "fs";
-import { currentLogFile } from "../Config";
+import { currentLogFile, TLogType } from "../Logging";
 
 const AdminRoute = Router();
+let lastSentLogEntry: TLogType;
+
+const getNewLogs = (logData: string) => {
+  const newLogs: string[] = [];
+  const logLines = logData.trim().split("\n");
+  if (!lastSentLogEntry) lastSentLogEntry = JSON.parse(logLines[0]);
+
+  const logJson = logLines.map((line) => JSON.parse(line));
+  const newestLog = logJson[logJson.length - 1];
+
+  if (newestLog !== lastSentLogEntry) {
+    let temp = newestLog;
+    let index = 1;
+    while (
+      temp.time > lastSentLogEntry.time &&
+      logJson.length - 1 > index &&
+      newestLog !== lastSentLogEntry
+    ) {
+      newLogs.push(logLines[logLines.length - index]);
+      index++;
+      temp = logJson[logJson.length - index];
+    }
+    lastSentLogEntry = newestLog;
+  }
+  return newLogs;
+};
 
 AdminRoute.get("/api/admin/logs", (request: Request, response: Response) => {
   response.setHeader("Content-Type", "text/event-stream");
   response.setHeader("Cache-Control", "no-store");
   response.setHeader("Connection", "keep-alive");
-  console.log("getting logs");
 
   fs.readFile(currentLogFile, "utf-8", (err, data) => {
     if (err) {
@@ -16,28 +41,31 @@ AdminRoute.get("/api/admin/logs", (request: Request, response: Response) => {
       response.status(500).send("Error reading log file");
       return;
     }
-    response.write(`data: ${data}\n\n`);
+
+    getNewLogs(data)
+      .reverse()
+      .map((log) => {
+        response.write(`data: ${log}\n\n`);
+        response.flush();
+      });
   });
 
-  const logInterval = setInterval(() => {
+  fs.watchFile(currentLogFile, (_current, _previous) => {
     fs.readFile(currentLogFile, "utf-8", (err, data) => {
       if (err) {
         console.error("Error reading log file:", err);
         return;
       }
-
-      // Split log file content into lines
-      const logLines = data.trim().split("\n");
-      // Get the last log entry
-      const lastLogEntry = logLines[logLines.length - 1];
-
-      // Send the last log entry to the client
-      response.write(`data: ${lastLogEntry}\n\n`);
+      getNewLogs(data)
+        .reverse()
+        .map((log) => {
+          response.write(`data: ${log}\n\n`);
+          response.flush();
+        });
     });
-  }, 5000);
+  });
 
   request.on("close", () => {
-    // clearInterval(logInterval);
     response.end();
   });
 });

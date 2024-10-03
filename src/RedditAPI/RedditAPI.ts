@@ -1,6 +1,6 @@
 import { GetImageLinksFromSubreddit } from "./RedditLinksGatherer";
 import { GetAuthenticationToken } from "./RedditAuthentication";
-import log from "../Config";
+import log from "../Logging";
 
 async function GetAccessToken(): Promise<string> {
   return new Promise(async (resolve, reject) => {
