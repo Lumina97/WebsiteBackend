@@ -12,6 +12,7 @@ import cors from "cors";
 const app = express();
 const envPath = path.join(__dirname, "website.env");
 dotenv.config({ path: envPath });
+
 app.use(compression());
 app.use(express.json());
 
@@ -44,5 +45,5 @@ app.use(
   })
 );
 
-const port = 3000;
+const port = process.env.REFRESH_TOKEN || 10000;
 app.listen(port, () => log.info("listening on " + port));
