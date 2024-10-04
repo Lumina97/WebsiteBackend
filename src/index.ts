@@ -7,7 +7,7 @@ import session from "express-session";
 import { v4 as uuidv4 } from "uuid";
 import compression from "compression";
 import log from "./Logging";
-// import cors from "cors";
+import cors from "cors";
 
 const app = express();
 const envPath = path.join(__dirname, "website.env");
@@ -18,15 +18,14 @@ app.use(express.json());
 const oneDay = 1000 * 60 * 60 * 24;
 const secretKey = process.env.SESSION_SECRET || "someRaNdOmSeCRet";
 
-// app.use(cors());
-// app.options("*", cors()); // Handle preflight requests
-// // Add this before your route definitions
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173", // Your frontend URL
-//     methods: ["GET"],
-//   })
-// );
+app.use(cors());
+app.options("*", cors());
+app.use(
+  cors({
+    origin: "https://eriknivala.com",
+    methods: ["GET"],
+  })
+);
 
 app.use(ImageGathererRouter);
 app.use(AdminRoute);
