@@ -19,6 +19,7 @@ async function RefreshAccessToken(): Promise<any> {
   });
 
   try {
+    log.info(`Requesting access token with refresh token: ${Refresh_Token}`);
     const result: AxiosResponse = await axios.post(
       "https://www.reddit.com/api/v1/access_token",
       payload,
