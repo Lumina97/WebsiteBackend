@@ -51,12 +51,14 @@ async function RefreshAccessToken(): Promise<any> {
       return res_Data;
     }
   } catch (err) {
-    log.error("Error requesting access token:\n" + err);
+    log.error("Error requesting access token:");
+    log.error(err);
     throw new Error(String(err));
   }
 }
 
 export async function GetAuthenticationToken(): Promise<string> {
+  log.info(`current access_token ${Access_Token}`);
   if (
     typeof Access_Token === "undefined" ||
     CheckAccessTokenTimeLimitReached()
@@ -64,10 +66,11 @@ export async function GetAuthenticationToken(): Promise<string> {
     try {
       await RefreshAccessToken();
       return Access_Token as string;
-    } catch {
+    } catch (error) {
       log.error(
         "There was an error refreshing the token! - RedditAuthentication.ts"
       );
+      log.error(error);
       throw new Error("Failed to refresh token");
     }
   } else {
