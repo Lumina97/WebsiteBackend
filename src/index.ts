@@ -22,7 +22,7 @@ app.use(cors());
 app.options("*", cors());
 app.use(
   cors({
-    origin: "https://eriknivala.com",
+    origin: "https://www.eriknivala.com",
     methods: ["GET"],
   })
 );
