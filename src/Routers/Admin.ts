@@ -76,12 +76,21 @@ AdminRoute.get("/api/admin/logs", (request: Request, response: Response) => {
     });
 
     request.on("close", () => {
+      console.error(`event stream close!`);
+      fs.unwatchFile(currentLogFile);
       response.end();
     });
   } catch (error) {
+    fs.unwatchFile(currentLogFile);
     console.error(`event stream error: ${error}`);
     response.end();
   }
+
+  request.on("error", (error) => {
+    console.error(`event stream error: ${error}`);
+    response.end();
+    fs.unwatchFile(currentLogFile);
+  });
 });
 
 export { AdminRoute };
