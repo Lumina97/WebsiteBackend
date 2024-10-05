@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import archiver from "archiver";
-import log from "./Logging"; // Ensure `log` is properly typed in Config
+import log from "./Logging";
 import { imageFilePath } from "./globals";
 
 const root = imageFilePath;
