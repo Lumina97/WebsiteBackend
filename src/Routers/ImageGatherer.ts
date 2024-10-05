@@ -1,7 +1,7 @@
 import { Router } from "express";
 import log from "../Logging";
 import { DownloadFilesFromLinksAndZip } from "../FileDownloader";
-import { GetAllImageLinks } from "../RedditAPI/RedditAPI";
+import { GetImageLinksFromSubreddit } from "../RedditAPI/RedditLinksGatherer";
 
 const ImageGathererRouter = Router();
 
@@ -52,7 +52,7 @@ ImageGathererRouter.post(
       return;
     }
 
-    await GetAllImageLinks(data.subreddit)
+    await GetImageLinksFromSubreddit(data.subreddit)
       .then((result) => {
         let returnData;
         try {

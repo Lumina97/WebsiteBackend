@@ -1,27 +1,17 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import querystring from "querystring";
 import log from "../Logging";
-
-const oAuthURL = "https://oauth.reddit.com";
-const imagePostAmount = 100;
-let Access_Token: string | undefined;
 
 async function GetRedditPosts(subreddit: string): Promise<[string, string][]> {
   log.info(
     `Getting posts from ${subreddit} - LinksGatherer.ts - GetRedditPosts()`
   );
 
-  const params = querystring.stringify({
-    limit: imagePostAmount,
-  });
-
-  const urlink = `${oAuthURL}/r/${subreddit}/new?${params}`.replace(/\s+/g, "");
+  const link = `https://www.reddit.com/r/${subreddit}/new/.json`;
 
   const config: AxiosRequestConfig = {
     method: "get",
-    url: urlink,
+    url: link,
     headers: {
-      Authorization: "Bearer " + (Access_Token as string),
       "User-Agent":
         "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1 Mobile/15E148 Safari/604.1",
     },
@@ -77,22 +67,19 @@ async function GetRedditPosts(subreddit: string): Promise<[string, string][]> {
     }
   } catch (err) {
     log.error(`RedditLinksGatherer - Error - ${err}`);
-    throw new Error(String(err));
+    throw new Error(`There has been an issue with the image request`);
   }
 }
 
 export const GetImageLinksFromSubreddit = async function (
-  subreddit: string,
-  access_token: string
+  subreddit: string
 ): Promise<[string, string][]> {
-  Access_Token = access_token;
-
   // validate input
-  if (typeof subreddit === "undefined") {
+  if (typeof subreddit === "undefined" || subreddit === "") {
     log.error(
       "Passed in subreddit was undefined! - DownloadImagesFromSubreddit() "
     );
-    throw new Error("There's been an issue getting images.");
+    throw new Error("Subreddit was either not defined or an empty string");
   }
 
   //wait to get links

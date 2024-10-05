@@ -17,7 +17,7 @@ const path_1 = __importDefault(require("path"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const axios_1 = __importDefault(require("axios"));
 const querystring_1 = __importDefault(require("querystring"));
-const Config_1 = __importDefault(require("../Config"));
+const Logging_1 = __importDefault(require("../Logging"));
 const basePath = path_1.default.resolve(__dirname, "../../");
 const envPath = path_1.default.join(basePath, "website.env");
 dotenv_1.default.config({ path: envPath });
@@ -31,6 +31,7 @@ function RefreshAccessToken() {
             refresh_token: Refresh_Token,
         });
         try {
+            Logging_1.default.info(`Requesting access token with refresh token: ${Refresh_Token}`);
             const result = yield axios_1.default.post("https://www.reddit.com/api/v1/access_token", payload, {
                 headers: {
                     Authorization: "Basic " +
@@ -42,7 +43,7 @@ function RefreshAccessToken() {
             });
             const res_Data = result.data;
             if (res_Data.error) {
-                Config_1.default.error("Unable to receive Bearer token: " + res_Data.error);
+                Logging_1.default.error("Unable to receive Bearer token: " + res_Data.error);
                 throw new Error(res_Data.error);
             }
             else {
@@ -52,21 +53,24 @@ function RefreshAccessToken() {
             }
         }
         catch (err) {
-            Config_1.default.error("Error requesting access token:\n" + err);
+            Logging_1.default.error("Error requesting access token:");
+            Logging_1.default.error(err);
             throw new Error(String(err));
         }
     });
 }
 function GetAuthenticationToken() {
     return __awaiter(this, void 0, void 0, function* () {
+        Logging_1.default.info(`current access_token ${Access_Token}`);
         if (typeof Access_Token === "undefined" ||
             CheckAccessTokenTimeLimitReached()) {
             try {
                 yield RefreshAccessToken();
                 return Access_Token;
             }
-            catch (_a) {
-                Config_1.default.error("There was an error refreshing the token! - RedditAuthentication.ts");
+            catch (error) {
+                Logging_1.default.error("There was an error refreshing the token! - RedditAuthentication.ts");
+                Logging_1.default.error(error);
                 throw new Error("Failed to refresh token");
             }
         }
@@ -77,18 +81,18 @@ function GetAuthenticationToken() {
 }
 function CheckAccessTokenTimeLimitReached() {
     if (typeof LastTokenRefreshTime === "undefined") {
-        Config_1.default.info("Last token time is undefined! - CheckAccessTokenTimeLimitReached()");
+        Logging_1.default.info("Last token time is undefined! - CheckAccessTokenTimeLimitReached()");
         return false;
     }
     const timePassed = Date.now() - LastTokenRefreshTime;
     const tokenTime = new Date(LastTokenRefreshTime);
     tokenTime.setHours(tokenTime.getHours() + 1);
     if (timePassed > tokenTime.getTime()) {
-        Config_1.default.info("New token required!");
+        Logging_1.default.info("New token required!");
         return true;
     }
     else {
-        Config_1.default.info("Token is still viable!");
+        Logging_1.default.info("Token is still viable!");
         return false;
     }
 }

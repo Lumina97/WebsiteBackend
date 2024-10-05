@@ -45,5 +45,5 @@ app.use(
   })
 );
 
-const port = process.env.REFRESH_TOKEN || 10000;
+const port = process.env.PORT || 10000;
 app.listen(port, () => log.info("listening on " + port));

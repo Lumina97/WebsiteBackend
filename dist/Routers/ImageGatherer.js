@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ImageGathererRouter = void 0;
 const express_1 = require("express");
-const Config_1 = __importDefault(require("../Config"));
+const Logging_1 = __importDefault(require("../Logging"));
 const FileDownloader_1 = require("../FileDownloader");
 const RedditAPI_1 = require("../RedditAPI/RedditAPI");
 const ImageGathererRouter = (0, express_1.Router)();
@@ -27,29 +27,29 @@ ImageGathererRouter.post("/api/downloadFilesFromLinks", (request, response) => _
             throw new Error("FileDownload returned with an error");
         try {
             let data = JSON.stringify({ path: result });
-            Config_1.default.info(`Returning data: ${data}`);
+            Logging_1.default.info(`Returning data: ${data}`);
             response.json(data);
         }
         catch (error) {
-            Config_1.default.error("ERROR:\n" + error);
+            Logging_1.default.error("ERROR:\n" + error);
         }
     })
         .catch((reason) => {
         response.status(400).send({ error: reason });
-        Config_1.default.error(reason);
+        Logging_1.default.error(reason);
     });
 }));
 ImageGathererRouter.post("/api/download", function (request, response) {
     return __awaiter(this, void 0, void 0, function* () {
         const { path } = request.body;
-        Config_1.default.info(path);
+        Logging_1.default.info(path);
         response.status(200).download(path, (err) => {
             if (err) {
-                Config_1.default.error("Error occurred while downloading the file:", err);
+                Logging_1.default.error("Error occurred while downloading the file:", err);
                 response.status(500).send("Error occurred while downloading the file");
             }
             else {
-                Config_1.default.info("download completed!");
+                Logging_1.default.info("download completed!");
             }
         });
     });
@@ -58,7 +58,7 @@ ImageGathererRouter.post("/api/ImageLoader", function (request, response) {
     return __awaiter(this, void 0, void 0, function* () {
         const data = request.body;
         if (!data.subreddit) {
-            Config_1.default.warn("Subreddit was empty!");
+            Logging_1.default.warn("Subreddit was empty!");
             response.json({ ERROR: "Subreddit was empty!" });
             return;
         }
@@ -70,12 +70,12 @@ ImageGathererRouter.post("/api/ImageLoader", function (request, response) {
                 response.json(returnData);
             }
             catch (error) {
-                Config_1.default.warn("Error parsing json! \n" + error);
+                Logging_1.default.warn("Error parsing json! \n" + error);
                 throw new Error("There was an error getting your data!");
             }
         })
             .catch((error) => {
-            Config_1.default.error(`${error} | imageGatherer.ts`);
+            Logging_1.default.error(`${error} | imageGatherer.ts`);
             response.status(400).send();
         });
     });

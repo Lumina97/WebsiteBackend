@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetAllImageLinks = void 0;
 const RedditLinksGatherer_1 = require("./RedditLinksGatherer");
 const RedditAuthentication_1 = require("./RedditAuthentication");
-const Config_1 = __importDefault(require("../Config"));
+const Logging_1 = __importDefault(require("../Logging"));
 function GetAccessToken() {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
@@ -36,7 +36,7 @@ const GetAllImageLinks = (subreddit) => __awaiter(void 0, void 0, void 0, functi
             access_token = yield GetAccessToken();
         }
         catch (error) {
-            Config_1.default.error("RedditAPI - Error Getting access token!");
+            Logging_1.default.error("RedditAPI - Error Getting access token!");
             reject("Error Getting access token!");
             return;
         }
@@ -45,7 +45,7 @@ const GetAllImageLinks = (subreddit) => __awaiter(void 0, void 0, void 0, functi
             resolve(result);
         })
             .catch((error) => {
-            Config_1.default.error("RedditAPI - There was an error while gathering subreddit images!");
+            Logging_1.default.error("RedditAPI - There was an error while gathering subreddit images!");
             reject(error);
         });
     }));
