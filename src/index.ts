@@ -20,6 +20,10 @@ app.use(
   })
 );
 
+setInterval(() => {
+  log.info("Health check");
+}, 60000);
+
 app.use(ImageGathererRouter);
 app.use(AdminRoute);
 
