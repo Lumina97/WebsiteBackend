@@ -11,10 +11,6 @@ async function GetRedditPosts(subreddit: string): Promise<[string, string][]> {
   const config: AxiosRequestConfig = {
     method: "get",
     url: link,
-    // headers: {
-    //   "User-Agent":
-    //     "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1 Mobile/15E148 Safari/604.1",
-    // },
   };
 
   try {
@@ -81,7 +77,6 @@ async function GetRedditPosts(subreddit: string): Promise<[string, string][]> {
 export const GetImageLinksFromSubreddit = async function (
   subreddit: string
 ): Promise<[string, string][]> {
-  // validate input
   if (typeof subreddit === "undefined" || subreddit === "") {
     log.error(
       "Passed in subreddit was undefined! - DownloadImagesFromSubreddit() "
