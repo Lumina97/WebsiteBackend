@@ -15,8 +15,8 @@ app.options("*", cors());
 app.use(
   cors({
     origin: "https://www.eriknivala.com",
-    methods: ["GET", "POST", "PUT", "DELETE"], // Adjust methods as necessary
-    allowedHeaders: ["Content-Type", "Authorization"], // Adjust headers as needed
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 

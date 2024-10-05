@@ -18,7 +18,14 @@ async function GetRedditPosts(subreddit: string): Promise<[string, string][]> {
   };
 
   try {
-    const result: AxiosResponse = await axios(config);
+    const result: AxiosResponse = await axios(config)
+      .then((result) => result)
+      .catch((error) => {
+        if (error.response) {
+          log.error(error.response.data); // => the response payload
+        }
+        throw new Error("There was an issue with the reddit request");
+      });
     const postArray = result.data.data.children;
 
     if (!postArray || postArray.length === 0) {
