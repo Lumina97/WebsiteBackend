@@ -41,6 +41,7 @@ AdminRoute.get("/api/admin/logs", (request: Request, response: Response) => {
   response.setHeader("Cache-Control", "no-store");
   response.setHeader("Connection", "keep-alive");
 
+  console.log("event stream started!");
   try {
     fs.readFile(currentLogFile, "utf-8", (err, data) => {
       if (err) {
@@ -66,6 +67,7 @@ AdminRoute.get("/api/admin/logs", (request: Request, response: Response) => {
         getNewLogs(data)
           ?.reverse()
           .map((log) => {
+            console.log(`sending new file: ${log}`);
             response.write(`data: ${log}\n\n`);
             response.flush();
           });
