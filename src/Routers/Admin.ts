@@ -53,6 +53,7 @@ AdminRoute.get("/api/admin/logs", (request: Request, response: Response) => {
       getNewLogs(data)
         ?.reverse()
         .map((log) => {
+          console.log(`sending new file: ${log}`);
           response.write(`data: ${log}\n\n`);
           response.flush();
         });
@@ -78,6 +79,7 @@ AdminRoute.get("/api/admin/logs", (request: Request, response: Response) => {
       response.end();
     });
   } catch (error) {
+    console.error(`event stream error: ${error}`);
     response.end();
   }
 });
